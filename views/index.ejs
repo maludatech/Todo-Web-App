@@ -1,0 +1,34 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main/style.css">
+    <title>Todoey⌚</title>
+</head>
+<body>
+    <%- include("header.ejs") %>
+    <div class="heading-container"><h1><%= listTitle %></h1></div>
+
+    <form action="/delete" method="post">
+    <ul>
+      <% listItems.forEach((item, index) => { %>
+          <li class="list-container">
+              <input type="checkbox" class="checkbox" data-index="<%= index %>" onchange="this.form.submit()" name="checkbox" value="<%= item._id %>">
+              <span class="todo-text"><%= item.name %></span>
+              <input type="hidden" hidden name="listName" value="<%= listTitle %>">
+          </li>
+      <% }); %> 
+  </ul>
+</form>
+
+    <div class="note-container">
+       <form action="/add" method="post">
+            <input type="text" name="newTodo" placeholder="Add new task" class="todo-note">
+            <button class="add-list-btn" value="<%= listTitle %>" type="submit" name="newItem"><div id="plus-icon">+</div></button>
+        </form>
+        </div>
+
+    <%- include("footer.ejs") %>
+    <script src="script.js"></script>
+</body>
+</html>
