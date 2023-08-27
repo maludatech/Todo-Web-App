@@ -1,7 +1,7 @@
-const express = require("express");
-const bodyParser = require("body-parser")
-const  mongoose = require("mongoose")
-const _ = require("lodash");
+import express from "express";
+import bodyParser from "body-parser";
+import  mongoose from "mongoose";
+import _ from "lodash";
 
 
 const app = express();
@@ -139,6 +139,6 @@ mongoose.set("strictQuery", true);
   }
 })();
 
-app.listen(port, () => {
+app.listen(process.env.PORT||port, () => {
   console.log(`Server is up and running on Port: ${port}`);
 });
