@@ -136,8 +136,9 @@ li{
     border-radius: 5px;
     margin-right: 400px;
     margin-left: 400px;
-    height: 50px;
-    padding-top: 1px;
+    height: 55px;
+    padding: 1px;
+    padding-bottom: 3px;
 }
 .love-logo{
     color: rgb(243, 67, 67);
