@@ -5,7 +5,7 @@ import _ from "lodash";
 
 
 const app = express();
-const port = 3000;
+const port = 3200;
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.set("strictQuery", true);
@@ -45,30 +45,7 @@ mongoose.set("strictQuery", true);
 
     const List = mongoose.model("List", listSchema);
 
-    // Handle the dynamic routes outside of the app.get("/") handler
-    app.get("/:customPageName", async (req, res) => {
-      const customPageName = _.capitalize(req.params.customPageName);
-
-      try {
-        const foundList = await List.findOne({ name: customPageName }).exec();
-        if (!foundList) {
-          // Create a new list
-          const list = new List({
-            name: customPageName,
-            items: defaultItems,
-          });
-          // Save the List document
-          await list.save();
-          console.log(`List with name ${customPageName} created.`);
-          res.render("index.ejs", { listTitle: customPageName, listItems: defaultItems });
-        } else {
-          // Show an existing list
-          res.render("index.ejs", { listTitle: foundList.name, listItems: foundList.items });
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    });
+    
 
     app.get("/", async (req, res) => {
       try {
@@ -80,16 +57,16 @@ mongoose.set("strictQuery", true);
             res.redirect("/");
           } catch (insertError) {
             console.log("Error inserting default items:", insertError);
-            res.render("index.ejs", { listTitle: "Today", listItems: [] });
           }
-        } else {
-          res.render("index.ejs", { listTitle: "Today", listItems: items });
         }
+        res.render("index.ejs", { listTitle: "Today", listItems: items });
       } catch (error) {
         console.log("Error fetching items:", error);
         res.render("index.ejs", { listTitle: "Today", listItems: [] });
       }
     });
+    
+    
 
     app.post("/add", async (req, res) => {
       const newTodo = req.body.newTodo;
@@ -110,28 +87,45 @@ mongoose.set("strictQuery", true);
     });
 
     app.post("/delete", async (req, res) => {
-      const checkedItemId = req.body.checkbox;
-      const listName = req.body.listName
-
-      if(listName === "Today"){
+      const checkboxIds = Object.keys(req.body.checkbox);
+      const listName = req.body.listName;
+    
+      if (listName === "Today") {
         try {
-          await Item.findByIdAndRemove(checkedItemId);
-          console.log(`Item with ID ${checkedItemId} deleted.`);
+          await Item.deleteMany({ _id: { $in: checkboxIds } });
+          console.log(`Items with IDs ${checkboxIds.join(", ")} deleted.`);
         } catch (error) {
-          console.log("Error deleting item:", error);
+          console.log("Error deleting items:", error);
         }
         res.redirect("/");
-      }else{
-        try{
-        await List.findOneAndUpdate(
-        {name: listName},
-        {$pull: {items: {_id: checkedItemId}}});
-        res.redirect(`/${listName}`);
-      }catch(err){
-        console.log(`Error deleting listed items:${err}`)
-      }
+      } else {
+        try {
+          await List.findOneAndUpdate(
+            { name: listName },
+            { $pull: { items: { _id: { $in: checkboxIds } } } }
+          );
+          console.log(`Items with IDs ${checkboxIds.join(", ")} deleted from list ${listName}.`);
+          res.redirect(`/${listName}`);
+        } catch (err) {
+          console.log(`Error deleting listed items: ${err}`);
+        }
       }
     });
+    
+    app.delete("/delete/:itemId", async (req, res) => {
+      const itemId = req.params.itemId;
+    
+      try {
+        // Delete the item from the database using its ID
+        await Item.findByIdAndRemove(itemId);
+        console.log(`Item with ID ${itemId} deleted.`);
+        res.json({ message: 'Item deleted' });
+      } catch (error) {
+        console.log("Error deleting item:", error);
+        res.status(500).json({ error: 'Error deleting item' });
+      }
+    });
+    
 
   } catch (error) {
     console.log(`OH NO! MONGO CONNECTION/QUERY ERROR!`);
