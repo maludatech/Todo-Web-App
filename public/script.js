@@ -30,9 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Rest of your code...
-
-// Here, you can check if checkboxes is defined before trying to iterate over it
 if (checkboxes) {
   checkboxes.forEach(checkbox => {
     checkbox.addEventListener('click', () => {
@@ -42,10 +39,21 @@ if (checkboxes) {
       if (checkbox.checked) {
         // Add cross mark if checkbox is checked
         todoText.style.textDecoration = 'line-through';
-        // Remove the item from the list after 500 milliseconds (you can adjust the delay as needed)
-        setTimeout(() => {
-          todoText.parentElement.remove();
-        }, 500);
+
+        // Remove the item from the list immediately
+        todoText.parentElement.remove();
+
+        // Send a request to the server to delete the item by its ID
+        const itemId = checkbox.value;
+        fetch(`/delete/${itemId}`, {
+          method: 'DELETE',
+        })
+          .then(response => response.json())
+          .then(data => {
+            // Log the response from the server if needed
+            console.log(data);
+          })
+          .catch(error => console.error(error));
       } else {
         // Remove cross mark if checkbox is unchecked
         todoText.style.textDecoration = 'none';
