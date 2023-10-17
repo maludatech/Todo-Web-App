@@ -13,7 +13,7 @@
     <ul>
       <% listItems.forEach((item, index) => { %>
           <li class="list-container">
-              <input type="checkbox" class="checkbox" data-index="<%= index %>" onchange="this.form.submit()" name="checkbox" value="<%= item._id %>">
+            <input type="checkbox" class="checkbox" data-index="<%= index %>" name="checkbox[<%= item._id %>]" value="<%= item._id %>">
               <span class="todo-text"><%= item.name %></span>
               <input type="hidden" hidden name="listName" value="<%= listTitle %>">
           </li>
